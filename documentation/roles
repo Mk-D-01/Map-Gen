@@ -1,0 +1,125 @@
+Team Roles & Responsibilities (Simplified)
+Overview
+
+6 team members, each with a clear focus. No need to understand all the code — each person owns one piece.
+
+Role 1: Project Coordinator
+
+What they own: Project structure, team workflow, automation
+What they do:
+
+Create the main e can run the project locally without issues
+Ensure code revieproject folder and organize it into sections
+Set up rules for how team members share code (branching, merging)
+Create automated checks that run every time someone submits work (catches mistakes early)
+Write a guide: "How to set up this project on your computer"
+Make sure everyonw happens before work is merged into the main project
+
+Who they work with: Everyone (acts as coordinator)
+
+Role 2: Backend/Server Developer
+
+What they own: The application server that receives requests
+What they do:
+
+Build the server application that listens for requests from users
+Create the main entry point where all requests come in
+Set up 3 main endpoints:
+"Generate a map" endpoint (receives parameters, calls algorithm people, returns map data)
+"Export as image" endpoint (gets map data, passes to export person)
+"Export as JSON" endpoint (gets map data, passes to export person)
+Define what information each endpoint expects and what it sends back
+Write tests to verify each endpoint works correctly
+Handle errors gracefully (if something fails, show a helpful message)
+
+Who they work with:
+
+Algorithm developer (calls their functions)
+Export developer (sends them data)
+Frontend developer (sends them requests)
+Role 3: Procedural Generation Developer
+
+What they own: The map generation algorithms
+What they do:
+
+Write 3 different ways to generate random maps:
+Perlin Noise method (smooth, natural-looking terrain)
+Cellular Automata method (cave-like, organic structures)
+Binary Space Partition method (structured, room-based dungeons)
+Each algorithm takes in parameters (map size, randomness level, etc.)
+Each algorithm outputs a 2D grid of tiles with their types
+Ensure the same seed always produces the same map (reproducibility)
+Test edge cases (very small maps, very large maps, extreme parameters)
+Write documentation explaining how each algorithm works
+
+Who they work with:
+
+Backend developer (provides parameters, receives tile data)
+Role 4: Export/Data Developer
+
+What they own: Converting maps into downloadable files
+What they do:
+
+Take the generated map (2D grid of tiles) and convert it to a visual image
+Create color definitions (what color is grass? water? mountain?)
+Take the generated map and convert it to a JSON file (text format)
+Handle different export sizes (small image, large image)
+Write tests to verify images are created correctly
+Write tests to verify JSON files are valid
+
+Who they work with:
+
+Backend developer (receives tile data)
+Role 5: Frontend/UI Developer
+
+What they own: The website interface users interact with
+What they do:
+
+Design and build the webpage users see
+Create a dropdown menu to pick which algorithm to use
+Create sliders for parameters (map size, scale, complexity, etc.)
+Create a "Generate" button
+Show a preview of the generated map
+Create "Download as Image" button
+Create "Download as JSON" button
+Connect buttons to the server (send requests, receive maps)
+Render the map on screen from server data
+Handle loading states (show "generating..." while map is being created)
+
+Who they work with:
+
+Backend developer (sends requests, receives data)
+Role 6: Quality & Documentation Lead
+
+What they do:
+
+Test the entire system end-to-end (generate → export → download, all working together)
+Verify that each team member's work doesn't break others' work
+Write a setup guide for new developers
+Write user guide (how to use the application)
+Write API documentation (what each endpoint does, what data it needs)
+Write system architecture overview (big picture of how everything fits together)
+Write guide explaining each algorithm in plain language
+Measure how much of the code is tested
+Create a quality checklist before any release
+
+Who they work with: Everyone (coordinates with all roles)
+
+Simple Workflow
+Coordinator sets up the project folder and rules
+Algorithm Dev writes the 3 map generation methods
+Backend Dev creates the server that calls algorithms
+Export Dev adds image/JSON conversion
+Frontend Dev builds the webpage
+QA Lead tests everything and writes documentation
+Communication
+Each person works on their piece independently
+Share interfaces clearly (Backend tells Export: "I'll send you tiles like this")
+Code review before merging (at least one other person checks your work)
+Weekly sync: 10 min check-in on blockers
+Success Criteria
+
+✅ Each role has clear, isolated responsibilities
+✅ Beginner can understand what they're building without knowing all details
+✅ Easy to parallelize work (people don't step on each other)
+✅ Easy to replace tech stack later (logic stays the same)
