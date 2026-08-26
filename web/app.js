@@ -583,8 +583,58 @@
       });
     });
 
+    // 4. Mobile Menu Toggle & Dropdown Handling
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const navLinks = document.querySelector('nav.nav-links');
+
+    if (mobileNavToggle && navLinks) {
+      mobileNavToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mobileNavToggle.classList.toggle('active');
+        navLinks.classList.toggle('mobile-open');
+        document.body.classList.toggle('no-scroll', navLinks.classList.contains('mobile-open'));
+      });
+
+      // Mobile dropdown toggles on tap
+      const dropdowns = navLinks.querySelectorAll('.nav-dropdown');
+      dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+        if (trigger) {
+          trigger.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              e.stopPropagation();
+              // Close other open dropdowns
+              dropdowns.forEach(other => {
+                if (other !== dropdown) other.classList.remove('mobile-expanded');
+              });
+              dropdown.classList.toggle('mobile-expanded');
+            }
+          });
+        }
+      });
+
+      // Close menu when clicking outside or clicking a nav link
+      document.addEventListener('click', (e) => {
+        if (!navLinks.contains(e.target) && !mobileNavToggle.contains(e.target)) {
+          mobileNavToggle.classList.remove('active');
+          navLinks.classList.remove('mobile-open');
+          document.body.classList.remove('no-scroll');
+        }
+      });
+
+      navLinks.querySelectorAll('a:not(.nav-dropdown-trigger)').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileNavToggle.classList.remove('active');
+          navLinks.classList.remove('mobile-open');
+          document.body.classList.remove('no-scroll');
+        });
+      });
+    }
+
     // Run initial sandbox update
     updateSandbox();
   });
 
 })();
+
