@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Binary Space Partitioning (BSP) tree dungeon generation algorithm in Python.">
+  <title>Binary Space Partitioning (BSP) — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Algorithms</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">Binary Space Partitioning</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Dungeon Floorplan Generator</div>
+      <h1>Binary Space Partitioning (BSP)</h1>
+      <p class="lead">
+        Recursively bisects rectangular map bounds into a hierarchical binary tree, carving room chambers inside leaf node boundaries and linking sibling centroids using L-shaped corridor graphs.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Tree Depth</label>
+          <span>O(log N)</span>
+        </div>
+        <div class="meta-item">
+          <label>Space Complexity</label>
+          <span>O(W × H)</span>
+        </div>
+        <div class="meta-item">
+          <label>Data Structure</label>
+          <span>BSP Tree Nodes</span>
+        </div>
+        <div class="meta-item">
+          <label>Corridor Graph</label>
+          <span>Centroid Paths</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Algorithmic Overview</a></li>
+            <li><a href="#tree-bisection">2. Spatial Tree Bisection</a></li>
+            <li><a href="#room-carving">3. Room Carving Logic</a></li>
+            <li><a href="#corridors">4. Corridor Routing Graphs</a></li>
+            <li><a href="#python-code">5. Full Python Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Algorithmic Overview</h2>
+          <p>
+            Binary Space Partitioning (BSP) is a classic spatial subdivision algorithm widely used in game engines (such as Doom and Quake) for level geometry, collision detection, and dungeon floorplan synthesis.
+          </p>
+          <p>
+            Starting with a root rectangle covering the full map area, BSP recursively splits sub-regions either horizontally or vertically into binary child nodes until a minimum room size constraint is met.
+          </p>
+        </section>
+
+        <section id="tree-bisection" class="doc-block">
+          <h2>2. Spatial Tree Bisection</h2>
+          <p>The bisection decision evaluates node aspect ratios to maintain balanced room proportions:</p>
+
+          <div class="math-callout">
+            <div class="math-title">Split Axis Selection Rule</div>
+            <div class="math-formula">
+              SplitDirection = 
+              \begin{cases} 
+              \text{Horizontal} & \text{if } \frac{H}{W} \ge 1.25 \\ 
+              \text{Vertical} & \text{if } \frac{W}{H} \ge 1.25 \\ 
+              \text{Random Seed Choice} & \text{otherwise} 
+              \end{cases}
+            </div>
+          </div>
+        </section>
+
+        <section id="room-carving" class="doc-block">
+          <h2>3. Room Carving Logic</h2>
+          <p>
+            Once node splitting completes, rooms are carved inside each leaf node boundary ($Rw \approx 70\% \cdot W, Rh \approx 70\% \cdot H$). Carving rooms smaller than leaf node bounds guarantees that rooms never overlap and always leave wall space for corridors.
+          </p>
+        </section>
+
+        <section id="corridors" class="doc-block">
+          <h2>4. Corridor Routing Graphs</h2>
+          <p>
+            To ensure all carved rooms are fully reachable, the algorithm connects room centroids $(Cx, Cy)$ between adjacent sibling leaves using L-shaped horizontal and vertical corridor line segments.
+          </p>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>5. Full Python Implementation</h2>
+          <p>Here is the full Python 3 implementation of the BSP Dungeon Generator:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">bsp_dungeon_engine.py</span>
+            </div>
+            <pre><code><span class="py-keyword">import</span> math
+
+<span class="py-def">def</span> <span class="py-class">hash_coords</span>(x: int, y: int, seed: int) -> float:
+    n = (x + y * <span class="py-num">57</span> + seed * <span class="py-num">131</span>) & <span class="py-num">0xFFFFFFFF</span>
+    n = ((n << <span class="py-num">13</span>) ^ n) & <span class="py-num">0xFFFFFFFF</span>
+    term = (n * (n * n * <span class="py-num">15731</span> + <span class="py-num">789221</span>) + <span class="py-num">1376312589</span>) & <span class="py-num">0x7FFFFFFF</span>
+    <span class="py-keyword">return</span> <span class="py-num">1.0</span> - (term / <span class="py-num">1073741824.0</span>)
+
+<span class="py-keyword">class</span> <span class="py-class">BSPNode</span>:
+    <span class="py-def">def</span> <span class="py-class">__init__</span>(self, x: int, y: int, w: int, h: int):
+        self.x, self.y, self.w, self.h = x, y, w, h
+        self.left = None
+        self.right = None
+        self.room = None
+
+    <span class="py-def">def</span> <span class="py-class">split</span>(self, min_size: int, seed: int) -> bool:
+        <span class="py-keyword">if</span> self.left <span class="py-keyword">or</span> self.right: <span class="py-keyword">return</span> False
+
+        split_h = False
+        <span class="py-keyword">if</span> self.w / self.h >= <span class="py-num">1.25</span>: split_h = False
+        <span class="py-keyword">elif</span> self.h / self.w >= <span class="py-num">1.25</span>: split_h = True
+        <span class="py-keyword">else</span>: split_h = hash_coords(self.x, self.y, seed) > <span class="py-num">0</span>
+
+        max_size = (self.h <span class="py-keyword">if</span> split_h <span class="py-keyword">else</span> self.w) - min_size
+        <span class="py-keyword">if</span> max_size <= min_size: <span class="py-keyword">return</span> False
+
+        split_pos = min_size + int((max_size - min_size) * <span class="py-num">0.5</span>)
+
+        <span class="py-keyword">if</span> split_h:
+            self.left = BSPNode(self.x, self.y, self.w, split_pos)
+            self.right = BSPNode(self.x, self.y + split_pos, self.w, self.h - split_pos)
+        <span class="py-keyword">else</span>:
+            self.left = BSPNode(self.x, self.y, split_pos, self.h)
+            self.right = BSPNode(self.x + split_pos, self.y, self.w - split_pos, self.h)
+        <span class="py-keyword">return</span> True
+
+    <span class="py-def">def</span> <span class="py-class">create_rooms</span>(self, grid, width: int, height: int):
+        <span class="py-keyword">if</span> self.left <span class="py-keyword">or</span> self.right:
+            <span class="py-keyword">if</span> self.left: self.left.create_rooms(grid, width, height)
+            <span class="py-keyword">if</span> self.right: self.right.create_rooms(grid, width, height)
+        <span class="py-keyword">else</span>:
+            rw = max(<span class="py-num">3</span>, int(self.w * <span class="py-num">0.7</span>))
+            rh = max(<span class="py-num">3</span>, int(self.h * <span class="py-num">0.7</span>))
+            rx = self.x + (self.w - rw) // <span class="py-num">2</span>
+            ry = self.y + (self.h - rh) // <span class="py-num">2</span>
+            self.room = {'x': rx, 'y': ry, 'w': rw, 'h': rh, 'cx': rx + rw // <span class="py-num">2</span>, 'cy': ry + rh // <span class="py-num">2</span>}
+
+            <span class="py-keyword">for</span> py <span class="py-keyword">in</span> range(ry, ry + rh):
+                <span class="py-keyword">for</span> px <span class="py-keyword">in</span> range(rx, rx + rw):
+                    <span class="py-keyword">if</span> <span class="py-num">0</span> < py < height - <span class="py-num">1</span> <span class="py-keyword">and</span> <span class="py-num">0</span> < px < width - <span class="py-num">1</span>:
+                        grid[py][px] = <span class="py-num">1</span> <span class="py-comment"># 1 = Room floor</span>
+
+    <span class="py-def">def</span> <span class="py-class">get_rooms</span>(self):
+        <span class="py-keyword">if</span> self.room: <span class="py-keyword">return</span> [self.room]
+        rooms = []
+        <span class="py-keyword">if</span> self.left: rooms.extend(self.left.get_rooms())
+        <span class="py-keyword">if</span> self.right: rooms.extend(self.right.get_rooms())
+        <span class="py-keyword">return</span> rooms
+
+<span class="py-def">def</span> <span class="py-class">generate_bsp_dungeon</span>(width: int, height: int, seed: int, min_room_size=6):
+    grid = [[<span class="py-num">0</span>] * width <span class="py-keyword">for</span> _ <span class="py-keyword">in</span> range(height)]
+    root = BSPNode(<span class="py-num">1</span>, <span class="py-num">1</span>, width - <span class="py-num">2</span>, height - <span class="py-num">2</span>)
+    nodes = [root]
+
+    <span class="py-keyword">for</span> i <span class="py-keyword">in</span> range(<span class="py-num">5</span>):
+        <span class="py-keyword">for</span> j <span class="py-keyword">in</span> range(len(nodes)):
+            n = nodes[j]
+            <span class="py-keyword">if</span> n.split(min_room_size, seed + i * <span class="py-num">10</span> + j):
+                nodes.append(n.left)
+                nodes.append(n.right)
+
+    root.create_rooms(grid, width, height)
+    rooms = root.get_rooms()
+
+    <span class="py-keyword">for</span> i <span class="py-keyword">in</span> range(len(rooms) - <span class="py-num">1</span>):
+        r1, r2 = rooms[i], rooms[i + <span class="py-num">1</span>]
+        cx, cy = r1['cx'], r1['cy']
+        <span class="py-keyword">while</span> cx != r2['cx']:
+            grid[cy][cx] = <span class="py-num">2</span> <span class="py-comment"># 2 = Corridor</span>
+            cx += <span class="py-num">1</span> <span class="py-keyword">if</span> r2['cx'] > cx <span class="py-keyword">else</span> -<span class="py-num">1</span>
+        <span class="py-keyword">while</span> cy != r2['cy']:
+            grid[cy][cx] = <span class="py-num">2</span>
+            cy += <span class="py-num">1</span> <span class="py-keyword">if</span> r2['cy'] > cy <span class="py-keyword">else</span> -<span class="py-num">1</span>
+
+    <span class="py-keyword">return</span> grid</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

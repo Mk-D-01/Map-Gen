@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Cellular Automata cave generation algorithm in Python using 4-5 transition rule with hysteresis and flood-fill cavity cleanup.">
+  <title>Cellular Automata Caves — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Algorithms</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">Cellular Automata</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Cave System Solver</div>
+      <h1>Cellular Automata Cave Generation</h1>
+      <p class="lead">
+        Simulates organic cavern networks and subterranean tunnels using discrete grid state transitions, 8-neighbor Moore kernels, 4-5 rule state hysteresis, and BFS flood-fill connectivity passes.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Time Complexity</label>
+          <span>O(Passes × W × H)</span>
+        </div>
+        <div class="meta-item">
+          <label>Space Complexity</label>
+          <span>O(W × H)</span>
+        </div>
+        <div class="meta-item">
+          <label>Neighborhood</label>
+          <span>8-Way Moore Kernel</span>
+        </div>
+        <div class="meta-item">
+          <label>Rule Set</label>
+          <span>B5678 / S45678 (4-5 Rule)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Algorithmic Overview</a></li>
+            <li><a href="#rules">2. The 4-5 Rule & Hysteresis</a></li>
+            <li><a href="#border">3. Solid Boundary Padding</a></li>
+            <li><a href="#floodfill">4. Flood-Fill Pocket Cleanup</a></li>
+            <li><a href="#python-code">5. Full Python Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Algorithmic Overview</h2>
+          <p>
+            Cellular Automata (CA) grids model dynamic systems where cells evolve based on the states of their immediate neighbors. Made famous by Conway's Game of Life, CA algorithms are used in procedural level design to generate organic, subterranean cave maps.
+          </p>
+          <p>
+            The grid begins with a random noise pass (typically 45% wall density). Over successive smoothing passes (usually 4 to 6 iterations), noisy clusters coalesce into smooth cavern walls and open subterranean chambers.
+          </p>
+        </section>
+
+        <section id="rules" class="doc-block">
+          <h2>2. The 4-5 Rule & State Hysteresis</h2>
+          <p>
+            A common bug in basic CA cave implementations is setting a cell to open floor if neighbor count is 4. This causes cave systems to collapse or erode into open voids.
+          </p>
+          <p>
+            The <strong>Corrected 4-5 Rule with State Hysteresis</strong> enforces memory of the cell's previous state when neighbor count equals 4:
+          </p>
+
+          <div class="math-callout">
+            <div class="math-title">State Transition Rule Formula</div>
+            <div class="math-formula">
+              S_{t+1}(x, y) = 
+              \begin{cases} 
+              1 \text{ (Wall)} & \text{if } \sum_{N_8} S_t > 4 \\ 
+              0 \text{ (Floor)} & \text{if } \sum_{N_8} S_t < 4 \\ 
+              S_t(x, y) & \text{if } \sum_{N_8} S_t = 4 
+              \end{cases}
+            </div>
+          </div>
+        </section>
+
+        <section id="border" class="doc-block">
+          <h2>3. Solid Boundary Padding</h2>
+          <p>
+            To prevent caves from bleeding out into map edges, the outermost grid border ($x=0, x=W-1, y=0, y=H-1$) is locked as indestructible solid walls (1). Additionally, any neighbor lookups outside map boundaries are counted as solid wall cells (1).
+          </p>
+        </section>
+
+        <section id="floodfill" class="doc-block">
+          <h2>4. Flood-Fill Pocket Cleanup</h2>
+          <p>
+            Cellular Automata can occasionally leave tiny, isolated cave pockets disconnected from the main cave network. We run a Breadth-First Search (BFS) flood-fill pass to discover all connected cave components, keep the largest playable cavern, and fill small unplayable pockets back into solid rock.
+          </p>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>5. Full Python Implementation</h2>
+          <p>Here is the robust Python 3 implementation of our corrected 4-5 rule Cellular Automata cave solver:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">cellular_cave_engine.py</span>
+            </div>
+            <pre><code><span class="py-keyword">from</span> collections <span class="py-keyword">import</span> deque
+
+<span class="py-def">def</span> <span class="py-class">hash_coords</span>(x: int, y: int, seed: int) -> float:
+    n = (x + y * <span class="py-num">57</span> + seed * <span class="py-num">131</span>) & <span class="py-num">0xFFFFFFFF</span>
+    n = ((n << <span class="py-num">13</span>) ^ n) & <span class="py-num">0xFFFFFFFF</span>
+    term = (n * (n * n * <span class="py-num">15731</span> + <span class="py-num">789221</span>) + <span class="py-num">1376312589</span>) & <span class="py-num">0x7FFFFFFF</span>
+    <span class="py-keyword">return</span> <span class="py-num">1.0</span> - (term / <span class="py-num">1073741824.0</span>)
+
+<span class="py-def">def</span> <span class="py-class">generate_cellular_cave</span>(width: int, height: int, seed: int, fill_prob=0.45, passes=5):
+    <span class="py-comment"># Step 1: Initial Random Seed Pass with Solid Border</span>
+    grid = []
+    <span class="py-keyword">for</span> y <span class="py-keyword">in</span> range(height):
+        row = []
+        <span class="py-keyword">for</span> x <span class="py-keyword">in</span> range(width):
+            <span class="py-keyword">if</span> x == <span class="py-num">0</span> <span class="py-keyword">or</span> x == width - <span class="py-num">1</span> <span class="py-keyword">or</span> y == <span class="py-num">0</span> <span class="py-keyword">or</span> y == height - <span class="py-num">1</span>:
+                row.append(<span class="py-num">1</span>) <span class="py-comment"># Outer wall border</span>
+            <span class="py-keyword">else</span>:
+                h = (hash_coords(x, y, seed) + <span class="py-num">1.0</span>) * <span class="py-num">0.5</span>
+                row.append(<span class="py-num">1</span> <span class="py-keyword">if</span> h < fill_prob <span class="py-keyword">else</span> <span class="py-num">0</span>)
+        grid.append(row)
+
+    <span class="py-comment"># Step 2: Iterative 4-5 Rule Smoothing Passes</span>
+    <span class="py-keyword">for</span> _ <span class="py-keyword">in</span> range(passes):
+        new_grid = [[<span class="py-num">1</span>] * width <span class="py-keyword">for</span> _ <span class="py-keyword">in</span> range(height)]
+        <span class="py-keyword">for</span> y <span class="py-keyword">in</span> range(<span class="py-num">1</span>, height - <span class="py-num">1</span>):
+            <span class="py-keyword">for</span> x <span class="py-keyword">in</span> range(<span class="py-num">1</span>, width - <span class="py-num">1</span>):
+                wall_count = <span class="py-num">0</span>
+                <span class="py-keyword">for</span> dy <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+                    <span class="py-keyword">for</span> dx <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+                        <span class="py-keyword">if</span> dx == <span class="py-num">0</span> <span class="py-keyword">and</span> dy == <span class="py-num">0</span>: <span class="py-keyword">continue</span>
+                        nx, ny = x + dx, y + dy
+                        <span class="py-keyword">if</span> nx < <span class="py-num">0</span> <span class="py-keyword">or</span> nx >= width <span class="py-keyword">or</span> ny < <span class="py-num">0</span> <span class="py-keyword">or</span> ny >= height:
+                            wall_count += <span class="py-num">1</span>
+                        <span class="py-keyword">elif</span> grid[ny][nx] == <span class="py-num">1</span>:
+                            wall_count += <span class="py-num">1</span>
+
+                <span class="py-comment"># State hysteresis: >4 wall, <4 floor, ==4 retain existing state</span>
+                curr_val = grid[y][x]
+                <span class="py-keyword">if</span> wall_count > <span class="py-num">4</span>:
+                    new_grid[y][x] = <span class="py-num">1</span>
+                <span class="py-keyword">elif</span> wall_count < <span class="py-num">4</span>:
+                    new_grid[y][x] = <span class="py-num">0</span>
+                <span class="py-keyword">else</span>:
+                    new_grid[y][x] = curr_val
+        grid = new_grid
+
+    <span class="py-comment"># Step 3: Flood Fill Connectivity Pass (Keep largest cave body)</span>
+    visited = [[False] * width <span class="py-keyword">for</span> _ <span class="py-keyword">in</span> range(height)]
+    caves = []
+
+    <span class="py-keyword">for</span> y <span class="py-keyword">in</span> range(<span class="py-num">1</span>, height - <span class="py-num">1</span>):
+        <span class="py-keyword">for</span> x <span class="py-keyword">in</span> range(<span class="py-num">1</span>, width - <span class="py-num">1</span>):
+            <span class="py-keyword">if</span> grid[y][x] == <span class="py-num">0</span> <span class="py-keyword">and</span> <span class="py-keyword">not</span> visited[y][x]:
+                current_cave = []
+                q = deque([(x, y)])
+                visited[y][x] = True
+                <span class="py-keyword">while</span> q:
+                    cx, cy = q.popleft()
+                    current_cave.append((cx, cy))
+                    <span class="py-keyword">for</span> dx, dy <span class="py-keyword">in</span> ((<span class="py-num">1</span>,<span class="py-num">0</span>), (-<span class="py-num">1</span>,<span class="py-num">0</span>), (<span class="py-num">0</span>,<span class="py-num">1</span>), (<span class="py-num">0</span>,-<span class="py-num">1</span>)):
+                        nx, ny = cx + dx, cy + dy
+                        <span class="py-keyword">if</span> <span class="py-num">0</span> < nx < width - <span class="py-num">1</span> <span class="py-keyword">and</span> <span class="py-num">0</span> < ny < height - <span class="py-num">1</span>:
+                            <span class="py-keyword">if</span> grid[ny][nx] == <span class="py-num">0</span> <span class="py-keyword">and</span> <span class="py-keyword">not</span> visited[ny][nx]:
+                                visited[ny][nx] = True
+                                q.append((nx, ny))
+                caves.append(current_cave)
+
+    <span class="py-comment"># Fill isolated small cavities back to walls</span>
+    <span class="py-keyword">if</span> caves:
+        largest_cave = max(caves, key=len)
+        cave_set = set(largest_cave)
+        <span class="py-keyword">for</span> y <span class="py-keyword">in</span> range(<span class="py-num">1</span>, height - <span class="py-num">1</span>):
+            <span class="py-keyword">for</span> x <span class="py-keyword">in</span> range(<span class="py-num">1</span>, width - <span class="py-num">1</span>):
+                <span class="py-keyword">if</span> grid[y][x] == <span class="py-num">0</span> <span class="py-keyword">and</span> (x, y) <span class="py-keyword">not in</span> cave_set:
+                    grid[y][x] = <span class="py-num">1</span>
+
+    <span class="py-keyword">return</span> grid</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

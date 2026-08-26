@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Bitwise Spatial Hashing and PRNG Seed Math in Python for procedural level generation.">
+  <title>Spatial Bitwise Hash — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Data Structures</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">Spatial Bitwise Hash</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> PRNG Seed Function</div>
+      <h1>Spatial Bitwise Hash Function</h1>
+      <p class="lead">
+        A 32-bit bitwise hash function that maps 2D coordinate pairs $(x, y)$ and integer random seeds into reproducible pseudo-random scalar values $[-1.0, 1.0]$ without lookup table overhead.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Evaluation Speed</label>
+          <span>O(1) Bitwise Ops</span>
+        </div>
+        <div class="meta-item">
+          <label>Memory Usage</label>
+          <span>0 Bytes (Stateless)</span>
+        </div>
+        <div class="meta-item">
+          <label>Determinism</label>
+          <span>Strict Seed Math</span>
+        </div>
+        <div class="meta-item">
+          <label>Output Range</label>
+          <span>[-1.0, 1.0] Normalized</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Why Bitwise Hashing?</a></li>
+            <li><a href="#math">2. Bitwise Formula & Bitshifts</a></li>
+            <li><a href="#python-overflow">3. Python 32-bit Integer Masking</a></li>
+            <li><a href="#python-code">4. Full Python Function Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Why Bitwise Hashing?</h2>
+          <p>
+            Standard pseudo-random number generators (like Python's <code>random.random()</code>) rely on sequential state mutations. In spatial level generation, we need to query random values at arbitrary grid coordinates $(x, y)$ out-of-order and reproducibly based on a seed.
+          </p>
+          <p>
+            A <strong>Spatial Bitwise Hash</strong> acts as a stateless pseudo-random function $f(x, y, seed) \to \mathbb{R}$.
+          </p>
+        </section>
+
+        <section id="math" class="doc-block">
+          <h2>2. Bitwise Formula & Bitshifts</h2>
+
+          <div class="math-callout">
+            <div class="math-title">Spatial Hash Bitwise Equation</div>
+            <div class="math-formula">
+              n = (x + y \cdot 57 + seed \cdot 131) \ll 13 \oplus n \\
+              Hash = 1.0 - \frac{((n \cdot (n^2 \cdot 15731 + 789221) + 1376312589) \ \& \ 0x7FFFFFFF)}{1073741824.0}
+            </div>
+          </div>
+        </section>
+
+        <section id="python-overflow" class="doc-block">
+          <h2>3. Python 32-bit Integer Masking</h2>
+          <p>
+            In C/C++, integer overflow wraps around 32 bits automatically. Because Python handles arbitrarily large integers, we explicitly mask results with <code>& 0xFFFFFFFF</code> and <code>& 0x7FFFFFFF</code> to enforce identical 32-bit signed overflow behavior.
+          </p>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>4. Full Python Function Implementation</h2>
+          <p>Here is the full Python 3 spatial bitwise hash implementation:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">spatial_hash.py</span>
+            </div>
+            <pre><code><span class="py-def">def</span> <span class="py-class">spatial_hash_2d</span>(x: int, y: int, seed: int) -> float:
+    <span class="py-comment">"""
+    Stateless 32-bit Spatial Hash Function.
+    Returns a deterministic pseudo-random float in [-1.0, 1.0].
+    """</span>
+    <span class="py-comment"># Mix coordinates with prime multipliers</span>
+    n = (x + y * <span class="py-num">57</span> + seed * <span class="py-num">131</span>) & <span class="py-num">0xFFFFFFFF</span>
+    
+    <span class="py-comment"># Bitwise XOR and shift</span>
+    n = ((n << <span class="py-num">13</span>) ^ n) & <span class="py-num">0xFFFFFFFF</span>
+    
+    <span class="py-comment"># Quadratic congruence hashing with prime constants</span>
+    term = (n * (n * n * <span class="py-num">15731</span> + <span class="py-num">789221</span>) + <span class="py-num">1376312589</span>) & <span class="py-num">0x7FFFFFFF</span>
+    
+    <span class="py-comment"># Normalize to range [-1.0, 1.0]</span>
+    <span class="py-keyword">return</span> <span class="py-num">1.0</span> - (term / <span class="py-num">1073741824.0</span>)</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

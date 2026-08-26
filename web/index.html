@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Procedural Level Generation Engine in Python - In-Depth Algorithm and Data Structure Documentation & Rapid Prototyping Platform.">
+  <meta name="keywords" content="Procedural Generation, Python, Perlin Noise, Cellular Automata, BSP Trees, Data Structures, Algorithms, Game Development">
+  <title>MapGen Engine — Procedural Generation DSA & Python Engine</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Background Ambient Glow Effects -->
+  <div class="bg-glow-container" aria-hidden="true">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    <div class="bg-glow-3"></div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <!-- Algorithms Dropdown -->
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html">
+                <span>Perlin / Smooth Noise</span>
+                <span class="tag">Terrain</span>
+              </a>
+              <a href="cellular.html">
+                <span>Cellular Automata</span>
+                <span class="tag">Caves</span>
+              </a>
+              <a href="bsp.html">
+                <span>Binary Space Partition</span>
+                <span class="tag">Dungeons</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Data Structures Dropdown -->
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html">
+                <span>2D Spatial Grid</span>
+                <span class="tag">Matrix</span>
+              </a>
+              <a href="bsp-tree.html">
+                <span>BSP Binary Tree</span>
+                <span class="tag">Tree</span>
+              </a>
+              <a href="moore-neighborhood.html">
+                <span>Moore Neighborhood</span>
+                <span class="tag">Kernel</span>
+              </a>
+              <a href="spatial-hash.html">
+                <span>Spatial Bitwise Hash</span>
+                <span class="tag">PRNG</span>
+              </a>
+            </div>
+          </div>
+
+          <a href="#roles">Team Roles</a>
+          <a href="#dsa">Python Architecture</a>
+          <a href="#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="#sandbox" class="btn btn-primary btn-sm">Launch Playground</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Python 3 Procedural Architecture
+          </div>
+          <h1>In-Depth Procedural Algorithms & <span class="text-gradient-warm">Data Structures</span></h1>
+          <p class="hero-subtitle">
+            Transitioning level design from manual labor into pure mathematical algorithms. Explore comprehensive Python 3 implementations of Smooth Value Noise, 4-5 Rule Cellular Automata, and Binary Space Partition Trees.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#algorithms-grid" class="btn btn-primary">Explore Algorithms</a>
+            <a href="#sandbox" class="btn btn-secondary">Jump to Sandbox</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <h4>O(1)</h4>
+              <p>Spatial Lookups</p>
+            </div>
+            <div class="stat-item">
+              <h4>Python 3</h4>
+              <p>Core Implementation</p>
+            </div>
+            <div class="stat-item">
+              <h4>7 Subpages</h4>
+              <p>In-Depth Docs</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="preview-card">
+            <div class="preview-card-header">
+              <div class="window-dots">
+                <span class="window-dot red"></span>
+                <span class="window-dot yellow"></span>
+                <span class="window-dot green"></span>
+              </div>
+              <span class="preview-title">map_gen_engine.py — Python 3.10</span>
+            </div>
+
+            <div class="canvas-wrapper">
+              <canvas id="heroCanvas"></canvas>
+              <div class="preview-overlay">Perlin Noise Multi-Octave</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem & Solution Section -->
+  <section id="problem" class="problem-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">The Developer Bottleneck</div>
+        <h2>Why Procedural Algorithms in Python Simplify Game Engineering</h2>
+        <p>Shifting from complex C/C++ memory management to Python's expressiveness allows rapid algorithm prototyping, instant serialization, and clean modular team roles.</p>
+      </div>
+
+      <div class="comparison-grid">
+        <!-- Traditional Card -->
+        <div class="problem-card">
+          <span class="card-tag">Traditional Manual Sculpting</span>
+          <h3>The Manual Bottleneck</h3>
+          <p>Sculpting maps by hand results in low replayability and huge static asset sizes.</p>
+          
+          <ul class="feature-list">
+            <li>
+              <span class="icon">✕</span>
+              <span><strong>Slow Iteration:</strong> Sculpters spend weeks constructing static tile maps manually.</span>
+            </li>
+            <li>
+              <span class="icon">✕</span>
+              <span><strong>High Memory Footprint:</strong> Large static level files clog download sizes and disk storage.</span>
+            </li>
+            <li>
+              <span class="icon">✕</span>
+              <span><strong>Predictable Layouts:</strong> Fixed level layouts offer zero replayability.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Procedural Engine Card -->
+        <div class="solution-card">
+          <span class="card-tag">Python Algorithmic Solution</span>
+          <h3>Algorithmic Generation</h3>
+          <p>Using pure Python functions and seed mathematics, maps are synthesized dynamically on demand.</p>
+          
+          <ul class="feature-list">
+            <li>
+              <span class="icon">✓</span>
+              <span><strong>Instant Prototyping:</strong> Generate 10,000 unique map variations per second.</span>
+            </li>
+            <li>
+              <span class="icon">✓</span>
+              <span><strong>Zero File Footprint:</strong> Reconstruct entire 4K resolution worlds from a single 32-bit integer seed.</span>
+            </li>
+            <li>
+              <span class="icon">✓</span>
+              <span><strong>Pure Python Core:</strong> Clean modular architecture easy to integrate into Flask, Pygame, or Godot.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Algorithms Dedicated Hub Section -->
+  <section id="algorithms-grid">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">Dedicated Webpages</div>
+        <h2>Procedural Generation Algorithms</h2>
+        <p>Each algorithm has its own dedicated page with step-by-step mathematical explanations, Python source code, and visual breakdowns.</p>
+      </div>
+
+      <div class="roles-grid">
+        <!-- Algo 1: Perlin -->
+        <div class="role-card">
+          <span class="role-badge">Terrain & Biomes</span>
+          <h3>Perlin & Smooth Noise</h3>
+          <p>Quintic Hermite fade curves and spatial hashing for smooth organic heightmaps.</p>
+          <ul>
+            <li>Continuous C² gradient curves</li>
+            <li>Bilinear interpolation matrix</li>
+            <li>Multi-octave fractal superposition</li>
+          </ul>
+          <div style="margin-top: 1.5rem;">
+            <a href="perlin.html" class="btn btn-secondary btn-sm" style="width: 100%;">Read In-Depth Guide →</a>
+          </div>
+        </div>
+
+        <!-- Algo 2: Cellular Automata -->
+        <div class="role-card">
+          <span class="role-badge">Organic Caves</span>
+          <h3>Cellular Automata (4-5 Rule)</h3>
+          <p>Moore neighborhood grid transitions with state hysteresis and cavity cleanup.</p>
+          <ul>
+            <li>8-way neighbor count evaluation</li>
+            <li>State hysteresis rule ($B5678/S45678$)</li>
+            <li>BFS Flood-fill isolated pocket cleanup</li>
+          </ul>
+          <div style="margin-top: 1.5rem;">
+            <a href="cellular.html" class="btn btn-secondary btn-sm" style="width: 100%;">Read In-Depth Guide →</a>
+          </div>
+        </div>
+
+        <!-- Algo 3: BSP Trees -->
+        <div class="role-card">
+          <span class="role-badge">Dungeon Architecture</span>
+          <h3>Binary Space Partitioning</h3>
+          <p>Recursive binary tree bisection for carved rooms and connected corridor graphs.</p>
+          <ul>
+            <li>Recursive bounding box bisection</li>
+            <li>Leaf node room carving logic</li>
+            <li>L-shaped corridor graph routing</li>
+          </ul>
+          <div style="margin-top: 1.5rem;">
+            <a href="bsp.html" class="btn btn-secondary btn-sm" style="width: 100%;">Read In-Depth Guide →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DSA Dedicated Hub Section -->
+  <section id="dsa">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">Computer Science Foundation</div>
+        <h2>Data Structures & Foundations</h2>
+        <p>Deep dives into the spatial data structures powering our Python 3 level generation engine.</p>
+      </div>
+
+      <div class="dsa-grid">
+        <!-- DSA 1: 2D Spatial Grid -->
+        <div class="dsa-card">
+          <div class="dsa-header">
+            <div class="dsa-icon-box">Grid</div>
+            <div>
+              <h3>2D Spatial Grid & Matrix</h3>
+              <p>Flat 1D Array Buffer Mapping for O(1) Lookups</p>
+            </div>
+          </div>
+          <p>Maps 2D grid coordinates onto a contiguous 1D array buffer in Python: <code>index = y * width + x</code>.</p>
+          <div class="dsa-formula-box">Index(x, y) = y * Width + x</div>
+          <div style="margin-top: 1rem;">
+            <a href="spatial-grid.html" class="btn btn-secondary btn-sm">Explore Spatial Grid Spec →</a>
+          </div>
+        </div>
+
+        <!-- DSA 2: BSP Binary Tree -->
+        <div class="dsa-card">
+          <div class="dsa-header">
+            <div class="dsa-icon-box">Tree</div>
+            <div>
+              <h3>BSP Binary Tree Structure</h3>
+              <p>Hierarchical Bounding Box Nodes & Relationships</p>
+            </div>
+          </div>
+          <p>Tree structure storing parent node splits, left/right subtrees, and carved room rectangles.</p>
+          <div class="dsa-formula-box">class BSPNode: bounds, left, right, room</div>
+          <div style="margin-top: 1rem;">
+            <a href="bsp-tree.html" class="btn btn-secondary btn-sm">Explore BSP Tree Spec →</a>
+          </div>
+        </div>
+
+        <!-- DSA 3: Moore Neighborhood -->
+        <div class="dsa-card">
+          <div class="dsa-header">
+            <div class="dsa-icon-box">N₈</div>
+            <div>
+              <h3>Moore & Von Neumann Kernels</h3>
+              <p>3x3 Grid Stencil Math & Boundary Padding</p>
+            </div>
+          </div>
+          <p>8-way surrounding neighbor sampling for cellular state transitions and boundary checking.</p>
+          <div class="dsa-formula-box">d_∞(p, q) = max(|x1 - x2|, |y1 - y2|) ≤ 1</div>
+          <div style="margin-top: 1rem;">
+            <a href="moore-neighborhood.html" class="btn btn-secondary btn-sm">Explore Neighborhood Spec →</a>
+          </div>
+        </div>
+
+        <!-- DSA 4: Spatial Hash -->
+        <div class="dsa-card">
+          <div class="dsa-header">
+            <div class="dsa-icon-box">#</div>
+            <div>
+              <h3>Spatial Bitwise Hashing</h3>
+              <p>Deterministic Integer PRNG Functions</p>
+            </div>
+          </div>
+          <p>Bitwise XOR and multiplication hash converting coordinate seeds into reproducible random numbers.</p>
+          <div class="dsa-formula-box">Hash(x, y, seed) → [-1.0, 1.0]</div>
+          <div style="margin-top: 1rem;">
+            <a href="spatial-hash.html" class="btn btn-secondary btn-sm">Explore Spatial Hash Spec →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Python Code Walkthrough Section -->
+  <section id="walkthrough">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">Python Implementation</div>
+        <h2>Algorithmic Code Walkthrough (Python 3)</h2>
+        <p>Clean, un-truncated Python code demonstrating each procedural pipeline.</p>
+      </div>
+
+      <div class="visualizer-card">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="perlin">Perlin Noise (Python)</button>
+          <button class="tab-btn" data-tab="cellular">Cellular Automata (Python)</button>
+          <button class="tab-btn" data-tab="bsp">BSP Dungeon (Python)</button>
+        </div>
+
+        <!-- Tab 1: Perlin Python -->
+        <div id="tab-perlin" class="tab-content">
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">perlin_noise.py</span>
+            </div>
+            <pre><code><span class="py-keyword">import</span> math
+
+<span class="py-def">def</span> <span class="py-class">hash_coords</span>(x: int, y: int, seed: int) -> float:
+    n = (x + y * 57 + seed * 131) & 0xFFFFFFFF
+    n = ((n << 13) ^ n) & 0xFFFFFFFF
+    term = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7FFFFFFF
+    return 1.0 - (term / 1073741824.0)
+
+<span class="py-def">def</span> <span class="py-class">smooth_fade</span>(t: float) -> float:
+    <span class="py-comment"># Quintic Hermite polynomial: 6t^5 - 15t^4 + 10t^3</span>
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
+
+<span class="py-def">def</span> <span class="py-class">smooth_noise_2d</span>(x: float, y: float, seed: int) -> float:
+    X, Y = math.floor(x), math.floor(y)
+    xf, yf = x - X, y - Y
+    u, v = smooth_fade(xf), smooth_fade(yf)
+
+    n00 = (hash_coords(X, Y, seed) + 1.0) * 0.5
+    n10 = (hash_coords(X + 1, Y, seed) + 1.0) * 0.5
+    n01 = (hash_coords(X, Y + 1, seed) + 1.0) * 0.5
+    n11 = (hash_coords(X + 1, Y + 1, seed) + 1.0) * 0.5
+
+    x1 = n00 + u * (n10 - n00)
+    x2 = n01 + u * (n11 - n01)
+    return x1 + v * (x2 - x1)</code></pre>
+          </div>
+        </div>
+
+        <!-- Tab 2: Cellular Python -->
+        <div id="tab-cellular" class="tab-content" style="display: none;">
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">cellular_cave.py</span>
+            </div>
+            <pre><code><span class="py-def">def</span> <span class="py-class">generate_cellular_cave</span>(width: int, height: int, seed: int, fill_prob=0.45, passes=5):
+    <span class="py-comment"># Step 1: Initialize random wall grid with solid boundary</span>
+    grid = [[1 if x == 0 or x == width-1 or y == 0 or y == height-1 else
+             (1 if (hash_coords(x, y, seed) + 1) * 0.5 < fill_prob else 0)
+             for x in range(width)] for y in range(height)]
+
+    <span class="py-comment"># Step 2: Apply 4-5 Rule with State Hysteresis</span>
+    for _ in range(passes):
+        new_grid = [[1] * width for _ in range(height)]
+        for y in range(1, height - 1):
+            for x in range(1, width - 1):
+                walls = sum(grid[y+dy][x+dx] for dy in (-1,0,1) for dx in (-1,0,1) if not (dx==0 and dy==0))
+                if walls > 4: new_grid[y][x] = 1
+                elif walls < 4: new_grid[y][x] = 0
+                else: new_grid[y][x] = grid[y][x] <span class="py-comment"># Hysteresis retain</span>
+        grid = new_grid
+    return grid</code></pre>
+          </div>
+        </div>
+
+        <!-- Tab 3: BSP Python -->
+        <div id="tab-bsp" class="tab-content" style="display: none;">
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">bsp_dungeon.py</span>
+            </div>
+            <pre><code><span class="py-keyword">class</span> <span class="py-class">BSPNode</span>:
+    <span class="py-def">def</span> <span class="py-class">__init__</span>(self, x, y, w, h):
+        self.x, self.y, self.w, self.h = x, y, w, h
+        self.left = None
+        self.right = None
+        self.room = None
+
+    <span class="py-def">def</span> <span class="py-class">split</span>(self, min_size: int, seed: int) -> bool:
+        if self.left or self.right: return False
+        split_h = (self.h / self.w >= 1.25) if (self.w / self.h < 1.25) else False
+        max_size = (self.h if split_h else self.w) - min_size
+        if max_size <= min_size: return False
+        
+        split_pos = min_size + int((max_size - min_size) * 0.5)
+        if split_h:
+            self.left = BSPNode(self.x, self.y, self.w, split_pos)
+            self.right = BSPNode(self.x, self.y + split_pos, self.w, self.h - split_pos)
+        else:
+            self.left = BSPNode(self.x, self.y, split_pos, self.h)
+            self.right = BSPNode(self.x + split_pos, self.y, self.w - split_pos, self.h)
+        return True</code></pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Roles Section -->
+  <section id="roles">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">Modular Project Architecture</div>
+        <h2>6-Role Engineering Team Workflow (Python Stack)</h2>
+        <p>Updated team roles reflecting our transition to a pure Python 3 ecosystem (Flask, NumPy, Pillow, Pytest).</p>
+      </div>
+
+      <div class="roles-grid">
+        <!-- Role 1 -->
+        <div class="role-card">
+          <span class="role-badge">Role 1 — Infrastructure</span>
+          <h3>Project Coordinator & DevOps</h3>
+          <p>Owns repository structure, Docker Compose for Flask, and GitHub Actions CI workflow.</p>
+          <ul>
+            <li>Maintains <code>flake8</code> and <code>pytest</code> CI checks</li>
+            <li>Configures Docker containerization</li>
+            <li>Manages PR reviews & branch protection</li>
+          </ul>
+        </div>
+
+        <!-- Role 2 -->
+        <div class="role-card">
+          <span class="role-badge">Role 2 — Server Architecture</span>
+          <h3>Backend & API Developer</h3>
+          <p>Builds Flask REST API server listening for map requests and JSON responses.</p>
+          <ul>
+            <li>Implements <code>POST /api/generate</code></li>
+            <li>Implements <code>POST /api/export</code></li>
+            <li>Handles CORS & Flask test client</li>
+          </ul>
+        </div>
+
+        <!-- Role 3 -->
+        <div class="role-card">
+          <span class="role-badge">Role 3 — Algorithm Core</span>
+          <h3>Procedural Generation Dev</h3>
+          <p>Implements pure Python procedural functions (Noise, Cellular Automata, BSP Trees).</p>
+          <ul>
+            <li>Pure <code>perlin.py</code> terrain solver</li>
+            <li>Corrected <code>cellular.py</code> 4-5 rule</li>
+            <li>Recursive <code>bsp.py</code> tree generator</li>
+          </ul>
+        </div>
+
+        <!-- Role 4 -->
+        <div class="role-card">
+          <span class="role-badge">Role 4 — Data & Export</span>
+          <h3>Image & Export Developer</h3>
+          <p>Converts 2D map matrix into Pillow (PIL) PNG images and JSON payloads.</p>
+          <ul>
+            <li>Python Pillow (PIL) rendering</li>
+            <li>Biome color map palette</li>
+            <li>JSON tile matrix serializer</li>
+          </ul>
+        </div>
+
+        <!-- Role 5 -->
+        <div class="role-card">
+          <span class="role-badge">Role 5 — Web Interface</span>
+          <h3>Frontend UI Developer</h3>
+          <p>Designs interactive webpage UI, Python code documentation, and live sandbox playground.</p>
+          <ul>
+            <li>Dedicated subpages for algorithms</li>
+            <li>Python code documentation blocks</li>
+            <li>Canvas preview rendering engine</li>
+          </ul>
+        </div>
+
+        <!-- Role 6 -->
+        <div class="role-card">
+          <span class="role-badge">Role 6 — QA & Documentation</span>
+          <h3>Quality & Documentation Lead</h3>
+          <p>Ensures end-to-end integration, pytest test coverage, and clear algorithm guides.</p>
+          <ul>
+            <li>Full pipeline <code>pytest</code> suite</li>
+            <li>Mathematical documentation</li>
+            <li>Setup & API guide verification</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Sandbox Section (POSITIONED LAST AS REQUESTED) -->
+  <section id="sandbox">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge">Live Playground</div>
+        <h2>Interactive Level Prototyping Sandbox</h2>
+        <p>Select a procedural algorithm, adjust mathematical parameters, and render procedural maps live in your browser.</p>
+      </div>
+
+      <div class="sandbox-container">
+        <!-- Controls Sidebar -->
+        <div class="sandbox-sidebar">
+          <div class="control-group">
+            <label for="algoSelect">Generator Algorithm</label>
+            <select id="algoSelect" class="select-styled">
+              <option value="perlin">Perlin/Smooth Noise (Overworld Terrain)</option>
+              <option value="cellular">Cellular Automata (Organic Caves - 4-5 Rule)</option>
+              <option value="bsp">Binary Space Partitioning (Dungeons)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Random Seed</label>
+            <div class="seed-input-row">
+              <input type="number" id="seedInput" class="input-styled" value="42">
+              <button id="randomSeedBtn" class="btn btn-secondary btn-sm">Randomize</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Zoom / Frequency Scale <span id="scaleVal" class="val">0.040</span></label>
+            <input type="range" id="scaleSlider" class="range-styled" min="0.005" max="0.15" step="0.005" value="0.04">
+          </div>
+
+          <div class="control-group">
+            <label>Fractal Octaves <span id="octaveVal" class="val">2</span></label>
+            <input type="range" id="octaveSlider" class="range-styled" min="1" max="5" step="1" value="2">
+          </div>
+
+          <div class="control-group">
+            <label>Complexity / Passes <span id="detailVal" class="val">5</span></label>
+            <input type="range" id="detailSlider" class="range-styled" min="1" max="10" step="1" value="5">
+          </div>
+        </div>
+
+        <!-- Viewport & Toolbar -->
+        <div class="sandbox-viewport">
+          <div class="viewport-canvas-container">
+            <canvas id="sandboxCanvas"></canvas>
+          </div>
+
+          <div class="sandbox-toolbar">
+            <div class="tool-info">
+              <div>Tiles: <strong id="statTiles">20,000</strong></div>
+              <div>Memory: <strong id="statMem">156.3 KB</strong></div>
+              <div>Compute: <strong id="statTime">1.24 ms</strong></div>
+            </div>
+
+            <div class="export-btns">
+              <button id="copySeedBtn" class="btn btn-secondary btn-sm">Copy Seed</button>
+              <button id="exportJsonBtn" class="btn btn-secondary btn-sm">Export JSON</button>
+              <button id="downloadPngBtn" class="btn btn-primary btn-sm">Download PNG</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand-logo">
+            <div class="brand-icon">M</div>
+            <span>MapGen Engine</span>
+          </a>
+          <p>Solving game level prototyping bottlenecks through procedural algorithms and pure Python 3 data structures.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Algorithms</h4>
+          <ul>
+            <li><a href="perlin.html">Perlin Noise</a></li>
+            <li><a href="cellular.html">Cellular Automata</a></li>
+            <li><a href="bsp.html">BSP Dungeon Trees</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Data Structures</h4>
+          <ul>
+            <li><a href="spatial-grid.html">2D Spatial Grid</a></li>
+            <li><a href="bsp-tree.html">BSP Tree Node</a></li>
+            <li><a href="moore-neighborhood.html">Moore Neighborhood</a></li>
+            <li><a href="spatial-hash.html">Spatial Hashing</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Architecture</h4>
+          <ul>
+            <li><a href="#roles">Team Roles (Python)</a></li>
+            <li><a href="#problem">Developer Bottlenecks</a></li>
+            <li><a href="#sandbox">Live Playground</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, Flask, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic JS -->
+  <script src="app.js"></script>
+</body>
+</html>

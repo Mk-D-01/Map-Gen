@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on 2D Spatial Grids and 1D Flattened Array Buffer Data Structures in Python.">
+  <title>2D Spatial Grid & Flattened Matrix — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Data Structures</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">2D Spatial Grid</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Memory Buffer Architecture</div>
+      <h1>2D Spatial Grid & Flattened Matrix Buffer</h1>
+      <p class="lead">
+        Maps 2D spatial coordinate pairs $(x, y)$ onto a contiguous 1D array buffer, enabling $O(1)$ constant time tile access, high CPU L1/L2 cache locality, and zero memory overhead.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Access Time</label>
+          <span>O(1) Direct Lookup</span>
+        </div>
+        <div class="meta-item">
+          <label>Space Complexity</label>
+          <span>O(W × H) Contiguous</span>
+        </div>
+        <div class="meta-item">
+          <label>Cache Alignment</label>
+          <span>L1/L2 Friendly</span>
+        </div>
+        <div class="meta-item">
+          <label>Indexing Math</label>
+          <span>Index = y * W + x</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Data Structure Foundations</a></li>
+            <li><a href="#math">2. 1D Flattening Index Math</a></li>
+            <li><a href="#cache">3. CPU Cache Locality</a></li>
+            <li><a href="#python-code">4. Full Python Class Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Data Structure Foundations</h2>
+          <p>
+            In game map generation, grids represent 2D tilemaps containing terrain types, wall flags, and elevation values. While a naive list of lists (e.g. <code>grid[y][x]</code>) is simple, it incurs multi-pointer dereferencing overhead and non-contiguous memory allocations.
+          </p>
+          <p>
+            The <strong>Flattened 2D Spatial Grid</strong> stores the entire 2D world inside a single contiguous 1D memory array in row-major order.
+          </p>
+        </section>
+
+        <section id="math" class="doc-block">
+          <h2>2. 1D Flattening Index Math</h2>
+          <p>Converting back and forth between 2D coordinates $(x, y)$ and 1D buffer index $i$ is done with simple arithmetic:</p>
+
+          <div class="math-callout">
+            <div class="math-title">2D to 1D Index Formula</div>
+            <div class="math-formula">Index(x, y) = y \cdot Width + x</div>
+          </div>
+
+          <div class="math-callout">
+            <div class="math-title">1D to 2D Coordinate Inverse Formula</div>
+            <div class="math-formula">x = i \pmod{Width}, \quad y = \lfloor \frac{i}{Width} \rfloor</div>
+          </div>
+        </section>
+
+        <section id="cache" class="doc-block">
+          <h2>3. CPU Cache Locality & Performance</h2>
+          <p>
+            When processing grid algorithms (like Cellular Automata or Perlin sampling), adjacent cells along rows reside in consecutive memory addresses. This ensures prefetching into L1/L2 cache lines, boosting generation throughput.
+          </p>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>4. Full Python Class Implementation</h2>
+          <p>Here is a complete, object-oriented Python 3 implementation of the <code>SpatialGrid2D</code> data structure:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">spatial_grid.py</span>
+            </div>
+            <pre><code><span class="py-keyword">class</span> <span class="py-class">SpatialGrid2D</span>:
+    <span class="py-def">def</span> <span class="py-class">__init__</span>(self, width: int, height: int, default_val=0):
+        self.width = width
+        self.height = height
+        <span class="py-comment"># Single contiguous 1D array buffer</span>
+        self.buffer = [default_val] * (width * height)
+
+    <span class="py-def">def</span> <span class="py-class">get</span>(self, x: int, y: int):
+        <span class="py-comment">"""O(1) spatial lookup with boundary check."""</span>
+        <span class="py-keyword">if</span> <span class="py-num">0</span> <= x < self.width <span class="py-keyword">and</span> <span class="py-num">0</span> <= y < self.height:
+            <span class="py-keyword">return</span> self.buffer[y * self.width + x]
+        <span class="py-keyword">return</span> None
+
+    <span class="py-def">def</span> <span class="py-class">set</span>(self, x: int, y: int, val) -> bool:
+        <span class="py-comment">"""O(1) spatial mutation."""</span>
+        <span class="py-keyword">if</span> <span class="py-num">0</span> <= x < self.width <span class="py-keyword">and</span> <span class="py-num">0</span> <= y < self.height:
+            self.buffer[y * self.width + x] = val
+            <span class="py-keyword">return</span> True
+        <span class="py-keyword">return</span> False
+
+    <span class="py-def">def</span> <span class="py-class">get_neighbors_8</span>(self, x: int, y: int):
+        <span class="py-comment">"""Returns list of 8 Moore neighbor values."""</span>
+        neighbors = []
+        <span class="py-keyword">for</span> dy <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+            <span class="py-keyword">for</span> dx <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+                <span class="py-keyword">if</span> dx == <span class="py-num">0</span> <span class="py-keyword">and</span> dy == <span class="py-num">0</span>: <span class="py-keyword">continue</span>
+                val = self.get(x + dx, y + dy)
+                <span class="py-keyword">if</span> val <span class="py-keyword">is not</span> None:
+                    neighbors.append(val)
+        <span class="py-keyword">return</span> neighbors</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

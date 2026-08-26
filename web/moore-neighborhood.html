@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Moore and Von Neumann Neighborhood Stencil Kernels in Python.">
+  <title>Moore & Von Neumann Neighborhoods — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Data Structures</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">Moore Neighborhood</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Grid Kernel Stencil</div>
+      <h1>Moore & Von Neumann Neighborhood Kernels</h1>
+      <p class="lead">
+        Defines discrete $3 \times 3$ grid sampling stencils used to count surrounding wall and open space states in Cellular Automata, flood-fill connectivity, and tile autotiling.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Moore Count</label>
+          <span>8 Surrounding Cells</span>
+        </div>
+        <div class="meta-item">
+          <label>Von Neumann Count</label>
+          <span>4 Orthogonal Cells</span>
+        </div>
+        <div class="meta-item">
+          <label>Distance Metric</label>
+          <span>Chebyshev Distance</span>
+        </div>
+        <div class="meta-item">
+          <label>Boundary Padding</label>
+          <span>Solid Wall Guard</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Neighborhood Types</a></li>
+            <li><a href="#math">2. Chebyshev vs. Manhattan Distance</a></li>
+            <li><a href="#boundary">3. Boundary Edge Handling</a></li>
+            <li><a href="#python-code">4. Full Python Module Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Neighborhood Types</h2>
+          <p>Grid-based cellular algorithms sample surrounding cells to calculate local density:</p>
+          <ul>
+            <li><strong>Moore Neighborhood ($N_8$):</strong> Evaluates all 8 surrounding cells (orthogonal + diagonal). Used in Cellular Automata cave smoothing.</li>
+            <li><strong>Von Neumann Neighborhood ($N_4$):</strong> Evaluates only the 4 orthogonal cells (North, South, East, West). Used in flood-fill connectivity and pathfinding.</li>
+          </ul>
+        </section>
+
+        <section id="math" class="doc-block">
+          <h2>2. Chebyshev vs. Manhattan Distance Math</h2>
+
+          <div class="math-callout">
+            <div class="math-title">Moore Neighborhood (Chebyshev Distance)</div>
+            <div class="math-formula">N_8(x, y) = \{ (x', y') \mid \max(|x - x'|, |y - y'|) = 1 \}</div>
+          </div>
+
+          <div class="math-callout">
+            <div class="math-title">Von Neumann Neighborhood (Manhattan Distance)</div>
+            <div class="math-formula">N_4(x, y) = \{ (x', y') \mid |x - x'| + |y - y'| = 1 \}</div>
+          </div>
+        </section>
+
+        <section id="boundary" class="doc-block">
+          <h2>3. Boundary Edge Handling</h2>
+          <p>
+            When evaluating cells along map edges ($x=0$ or $y=0$), out-of-bounds coordinates must be clamped or padded to prevent out-of-index crashes. In our engine, out-of-bounds cells return a solid wall state (1) to constrain caves inside map boundaries.
+          </p>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>4. Full Python Module Implementation</h2>
+          <p>Here is a Python 3 module implementing both neighborhood sampling kernels:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">neighborhood_kernel.py</span>
+            </div>
+            <pre><code><span class="py-def">def</span> <span class="py-class">get_moore_neighbors</span>(grid, x: int, y: int, width: int, height: int) -> int:
+    <span class="py-comment">"""Counts 8 surrounding wall neighbors (Moore N8), treating out-of-bounds as wall."""</span>
+    count = <span class="py-num">0</span>
+    <span class="py-keyword">for</span> dy <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+        <span class="py-keyword">for</span> dx <span class="py-keyword">in</span> (-<span class="py-num">1</span>, <span class="py-num">0</span>, <span class="py-num">1</span>):
+            <span class="py-keyword">if</span> dx == <span class="py-num">0</span> <span class="py-keyword">and</span> dy == <span class="py-num">0</span>: <span class="py-keyword">continue</span>
+            nx, ny = x + dx, y + dy
+            <span class="py-keyword">if</span> nx < <span class="py-num">0</span> <span class="py-keyword">or</span> nx >= width <span class="py-keyword">or</span> ny < <span class="py-num">0</span> <span class="py-keyword">or</span> ny >= height:
+                count += <span class="py-num">1</span>
+            <span class="py-keyword">elif</span> grid[ny][nx] == <span class="py-num">1</span>:
+                count += <span class="py-num">1</span>
+    <span class="py-keyword">return</span> count
+
+<span class="py-def">def</span> <span class="py-class">get_von_neumann_neighbors</span>(grid, x: int, y: int, width: int, height: int) -> list:
+    <span class="py-comment">"""Returns valid 4 orthogonal neighbor coordinates (Von Neumann N4)."""</span>
+    neighbors = []
+    <span class="py-keyword">for</span> dx, dy <span class="py-keyword">in</span> ((<span class="py-num">1</span>,<span class="py-num">0</span>), (-<span class="py-num">1</span>,<span class="py-num">0</span>), (<span class="py-num">0</span>,<span class="py-num">1</span>), (<span class="py-num">0</span>,-<span class="py-num">1</span>)):
+        nx, ny = x + dx, y + dy
+        <span class="py-keyword">if</span> <span class="py-num">0</span> <= nx < width <span class="py-keyword">and</span> <span class="py-num">0</span> <= ny < height:
+            neighbors.append((nx, ny))
+    <span class="py-keyword">return</span> neighbors</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

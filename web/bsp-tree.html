@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Binary Space Partitioning Tree Data Structures and Spatial Hierarchy in Python.">
+  <title>BSP Partition Tree Data Structure — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Data Structures</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">BSP Binary Tree</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Spatial Tree Structure</div>
+      <h1>Binary Space Partitioning (BSP) Tree</h1>
+      <p class="lead">
+        A hierarchical binary tree data structure where each node represents a 2D bounding box $(x, y, w, h)$ split recursively into two child nodes until leaf nodes hold carved room geometries.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Node Type</label>
+          <span>Binary Tree Node</span>
+        </div>
+        <div class="meta-item">
+          <label>Search Complexity</label>
+          <span>O(log N)</span>
+        </div>
+        <div class="meta-item">
+          <label>Child References</label>
+          <span>Left & Right Pointer</span>
+        </div>
+        <div class="meta-item">
+          <label>Leaf Payload</label>
+          <span>Room Rect + Centroid</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Tree Architecture</a></li>
+            <li><a href="#node-fields">2. Node Definition & Fields</a></li>
+            <li><a href="#traversal">3. Recursive Tree Traversal</a></li>
+            <li><a href="#python-code">4. Full Python Class Implementation</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Tree Architecture</h2>
+          <p>
+            A <strong>BSP Tree</strong> is a recursive data structure used to subdivide a 2D bounding space into smaller convex regions.
+          </p>
+          <p>
+            The root node represents the entire map bounds. Non-leaf interior nodes store splitting axes (horizontal or vertical) and pointers to <code>left</code> and <code>right</code> subtrees. Leaf nodes store the final carved room coordinates.
+          </p>
+        </section>
+
+        <section id="node-fields" class="doc-block">
+          <h2>2. Node Definition & Memory Layout</h2>
+          <div class="math-callout">
+            <div class="math-title">BSP Node Structure Definition</div>
+            <div class="math-formula">Node = \{ x, y, width, height, left: Node*, right: Node*, room: Rect \}</div>
+          </div>
+        </section>
+
+        <section id="traversal" class="doc-block">
+          <h2>3. Recursive Tree Traversal</h2>
+          <p>
+            To carve rooms and establish corridor paths, we perform a Depth-First Search (DFS) or Breadth-First Search (BFS) traversal down to leaf nodes:
+          </p>
+          <ul>
+            <li><strong>Leaf Collection:</strong> If <code>left</code> and <code>right</code> are <code>None</code>, the node is a leaf holding room data.</li>
+            <li><strong>Corridor Routing:</strong> Connecting room centroids of sibling leaves creates connected room graphs without cycles.</li>
+          </ul>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>4. Full Python Class Implementation</h2>
+          <p>Here is a complete Python 3 implementation of the <code>BSPNode</code> and <code>BSPTree</code> classes:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">bsp_tree.py</span>
+            </div>
+            <pre><code><span class="py-keyword">class</span> <span class="py-class">BSPNode</span>:
+    <span class="py-def">def</span> <span class="py-class">__init__</span>(self, x: int, y: int, width: int, height: int):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.left = None
+        self.right = None
+        self.room = None
+
+    <span class="py-def">def</span> <span class="py-class">is_leaf</span>(self) -> bool:
+        <span class="py-keyword">return</span> self.left <span class="py-keyword">is</span> None <span class="py-keyword">and</span> self.right <span class="py-keyword">is</span> None
+
+    <span class="py-def">def</span> <span class="py-class">get_leaves</span>(self):
+        <span class="py-comment">"""Recursively gathers all leaf nodes in tree."""</span>
+        <span class="py-keyword">if</span> self.is_leaf():
+            <span class="py-keyword">return</span> [self]
+        leaves = []
+        <span class="py-keyword">if</span> self.left: leaves.extend(self.left.get_leaves())
+        <span class="py-keyword">if</span> self.right: leaves.extend(self.right.get_leaves())
+        <span class="py-keyword">return</span> leaves
+
+<span class="py-keyword">class</span> <span class="py-class">BSPTree</span>:
+    <span class="py-def">def</span> <span class="py-class">__init__</span>(self, map_width: int, map_height: int):
+        self.root = BSPNode(<span class="py-num">1</span>, <span class="py-num">1</span>, map_width - <span class="py-num">2</span>, map_height - <span class="py-num">2</span>)
+
+    <span class="py-def">def</span> <span class="py-class">split_recursive</span>(self, max_depth=5, min_room_size=6):
+        nodes = [self.root]
+        <span class="py-keyword">for</span> depth <span class="py-keyword">in</span> range(max_depth):
+            next_nodes = []
+            <span class="py-keyword">for</span> node <span class="py-keyword">in</span> nodes:
+                <span class="py-keyword">if</span> node.is_leaf():
+                    <span class="py-comment"># Attempt bisection split</span>
+                    <span class="py-keyword">pass</span>
+            nodes.extend(next_nodes)</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

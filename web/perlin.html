@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="In-depth guide on Perlin Noise and Smooth Value Noise algorithm in Python for procedural terrain generation.">
+  <title>Perlin & Smooth Value Noise — MapGen Engine Docs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">M</div>
+          <span>MapGen <span class="text-gradient-warm">Engine</span></span>
+        </a>
+
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+
+          <!-- Algorithms Dropdown -->
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Algorithms</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="perlin.html"><span>Perlin / Smooth Noise</span> <span class="tag">Terrain</span></a>
+              <a href="cellular.html"><span>Cellular Automata</span> <span class="tag">Caves</span></a>
+              <a href="bsp.html"><span>Binary Space Partition</span> <span class="tag">Dungeons</span></a>
+            </div>
+          </div>
+
+          <!-- Data Structures Dropdown -->
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+              <span>Data Structures</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="nav-dropdown-menu">
+              <a href="spatial-grid.html"><span>2D Spatial Grid</span> <span class="tag">Matrix</span></a>
+              <a href="bsp-tree.html"><span>BSP Binary Tree</span> <span class="tag">Tree</span></a>
+              <a href="moore-neighborhood.html"><span>Moore Neighborhood</span> <span class="tag">Kernel</span></a>
+              <a href="spatial-hash.html"><span>Spatial Bitwise Hash</span> <span class="tag">PRNG</span></a>
+            </div>
+          </div>
+
+          <a href="index.html#sandbox">Live Sandbox</a>
+        </nav>
+
+        <a href="index.html#sandbox" class="btn btn-primary btn-sm">Try in Sandbox</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subpage Hero -->
+  <section class="subpage-hero">
+    <div class="container">
+      <div class="nav-breadcrumbs">
+        <a href="index.html">Home</a> <span>/</span>
+        <a href="#">Algorithms</a> <span>/</span>
+        <span style="color: var(--accent-secondary);">Perlin & Smooth Noise</span>
+      </div>
+
+      <div class="badge"><span class="badge-dot"></span> Procedural Terrain Solver</div>
+      <h1>Perlin & Smooth Value Noise</h1>
+      <p class="lead">
+        Continuous, gradient-based pseudo-random noise used to generate natural terrain heightmaps, biomes, continental drift lines, and organic textures without grid artifacts.
+      </p>
+
+      <div class="algo-meta-grid">
+        <div class="meta-item">
+          <label>Time Complexity</label>
+          <span>O(W × H × Octaves)</span>
+        </div>
+        <div class="meta-item">
+          <label>Space Complexity</label>
+          <span>O(W × H)</span>
+        </div>
+        <div class="meta-item">
+          <label>Continuity Class</label>
+          <span>C² Continuous</span>
+        </div>
+        <div class="meta-item">
+          <label>Primary Use Case</label>
+          <span>Overworld Biomes</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subpage Main Content -->
+  <div class="container">
+    <div class="subpage-grid">
+      <!-- Sidebar TOC -->
+      <aside class="subpage-sidebar">
+        <div class="toc-card">
+          <h4>Table of Contents</h4>
+          <ul>
+            <li><a href="#overview">1. Algorithmic Basics</a></li>
+            <li><a href="#math">2. Mathematical Formulation</a></li>
+            <li><a href="#octaves">3. Multi-Octave Superposition</a></li>
+            <li><a href="#python-code">4. Full Python Implementation</a></li>
+            <li><a href="#biomes">5. Biome Palette Mapping</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Article Body -->
+      <main class="article-body">
+        <section id="overview" class="doc-block">
+          <h2>1. Algorithmic Basics</h2>
+          <p>
+            Pure random noise (white noise) assigns independent values to every coordinate. In game level generation, this produces chaotic static noise rather than natural landscapes.
+          </p>
+          <p>
+            <strong>Perlin & Smooth Value Noise</strong> solves this by constructing a continuous multi-dimensional gradient field. Adjacent grid coordinates produce smooth, gradual height transitions (mountains smoothly scaling down to coasts and ocean trenches).
+          </p>
+        </section>
+
+        <section id="math" class="doc-block">
+          <h2>2. Mathematical Formulation</h2>
+          <p>The noise generation pipeline executes four distinct mathematical steps:</p>
+
+          <div class="math-callout">
+            <div class="math-title">Step A: Spatial Hash Interpolation</div>
+            <p>Converts integer lattice coordinates (X, Y) into a deterministic random float using bitwise ops:</p>
+            <div class="math-formula">Hash(X, Y, Seed) = 1.0 - \frac{((n \cdot (n^2 \cdot 15731 + 789221) + 1376312589) \ \& \ 0x7FFFFFFF)}{1073741824.0}</div>
+          </div>
+
+          <div class="math-callout">
+            <div class="math-title">Step B: Quintic Hermite Fade Curve</div>
+            <p>To eliminate linear slope discontinuities, fractional offsets (xf, yf) pass through a 5th-degree polynomial:</p>
+            <div class="math-formula">Fade(t) = 6t^5 - 15t^4 + 10t^3</div>
+          </div>
+
+          <div class="math-callout">
+            <div class="math-title">Step C: Bilinear Interpolation (Lerp)</div>
+            <p>Blends four lattice corners $N_{00}, N_{10}, N_{01}, N_{11}$ using smoothed weights $u = Fade(xf)$ and $v = Fade(yf)$:</p>
+            <div class="math-formula">Lerp(a, b, t) = a + t \cdot (b - a)</div>
+          </div>
+        </section>
+
+        <section id="octaves" class="doc-block">
+          <h2>3. Multi-Octave Superposition (Fractal Noise)</h2>
+          <p>
+            Single-pass noise looks smooth but lacks fine terrain details (like small hills or sharp ridge edges). We layer multiple noise passes ("octaves") at increasing frequencies and decreasing amplitudes:
+          </p>
+          <div class="math-callout">
+            <div class="math-title">Fractal Noise Equation</div>
+            <div class="math-formula">Noise_{total}(x, y) = \sum_{o=0}^{O-1} \text{Amplitude}^o \cdot SmoothNoise(x \cdot 2^o, y \cdot 2^o)</div>
+          </div>
+        </section>
+
+        <section id="python-code" class="doc-block">
+          <h2>4. Full Python Implementation</h2>
+          <p>Below is the complete, standalone Python 3 implementation of our multi-octave smooth value noise engine:</p>
+
+          <div class="python-code-box">
+            <div class="code-header">
+              <span class="code-lang-badge">perlin_engine.py</span>
+            </div>
+            <pre><code><span class="py-keyword">import</span> math
+
+<span class="py-def">def</span> <span class="py-class">hash_coords</span>(x: int, y: int, seed: int) -> float:
+    <span class="py-comment">"""Bitwise 32-bit spatial hash producing deterministic float in [-1.0, 1.0]."""</span>
+    n = (x + y * <span class="py-num">57</span> + seed * <span class="py-num">131</span>) & <span class="py-num">0xFFFFFFFF</span>
+    n = ((n << <span class="py-num">13</span>) ^ n) & <span class="py-num">0xFFFFFFFF</span>
+    term = (n * (n * n * <span class="py-num">15731</span> + <span class="py-num">789221</span>) + <span class="py-num">1376312589</span>) & <span class="py-num">0x7FFFFFFF</span>
+    <span class="py-keyword">return</span> <span class="py-num">1.0</span> - (term / <span class="py-num">1073741824.0</span>)
+
+<span class="py-def">def</span> <span class="py-class">smooth_fade</span>(t: float) -> float:
+    <span class="py-comment">"""Quintic Hermite polynomial: C2 continuous smoothing."""</span>
+    <span class="py-keyword">return</span> t * t * t * (t * (t * <span class="py-num">6.0</span> - <span class="py-num">15.0</span>) + <span class="py-num">10.0</span>)
+
+<span class="py-def">def</span> <span class="py-class">smooth_noise_2d</span>(x: float, y: float, seed: int) -> float:
+    <span class="py-comment">"""Evaluates 2D continuous noise at fractional coordinate (x,y)."""</span>
+    X, Y = math.floor(x), math.floor(y)
+    xf, yf = x - X, y - Y
+
+    u = smooth_fade(xf)
+    v = smooth_fade(yf)
+
+    n00 = (hash_coords(X, Y, seed) + <span class="py-num">1.0</span>) * <span class="py-num">0.5</span>
+    n10 = (hash_coords(X + <span class="py-num">1</span>, Y, seed) + <span class="py-num">1.0</span>) * <span class="py-num">0.5</span>
+    n01 = (hash_coords(X, Y + <span class="py-num">1</span>, seed) + <span class="py-num">1.0</span>) * <span class="py-num">0.5</span>
+    n11 = (hash_coords(X + <span class="py-num">1</span>, Y + <span class="py-num">1</span>, seed) + <span class="py-num">1.0</span>) * <span class="py-num">0.5</span>
+
+    x1 = n00 + u * (n10 - n00)
+    x2 = n01 + u * (n11 - n01)
+    <span class="py-keyword">return</span> x1 + v * (x2 - x1)
+
+<span class="py-def">def</span> <span class="py-class">generate_perlin_map</span>(width: int, height: int, seed: int, scale=0.04, octaves=3, persistence=0.3):
+    <span class="py-comment">"""Generates a 2D matrix of terrain height values in range [0.0, 1.0]."""</span>
+    grid = []
+    <span class="py-keyword">for</span> y <span class="py-keyword">in</span> range(height):
+        row = []
+        <span class="py-keyword">for</span> x <span class="py-keyword">in</span> range(width):
+            total_noise = <span class="py-num">0.0</span>
+            freq = scale
+            amp = <span class="py-num">1.0</span>
+            max_amp = <span class="py-num">0.0</span>
+
+            <span class="py-keyword">for</span> o <span class="py-keyword">in</span> range(octaves):
+                total_noise += smooth_noise_2d(x * freq, y * freq, seed + o * <span class="py-num">100</span>) * amp
+                max_amp += amp
+                freq *= <span class="py-num">2.0</span>
+                amp *= persistence
+
+            row.append(total_noise / max_amp)
+        grid.append(row)
+    <span class="py-keyword">return</span> grid</code></pre>
+          </div>
+        </section>
+
+        <section id="biomes" class="doc-block">
+          <h2>5. Biome Palette Mapping</h2>
+          <p>The output scalar map (values from 0.0 to 1.0) is thresholded into distinct terrain biomes:</p>
+          <ul>
+            <li><strong>Deep Water:</strong> Height &lt; 0.42 (Navy color <code>#4b5587</code>)</li>
+            <li><strong>Sandy Coast:</strong> 0.42 ≤ Height &lt; 0.48 (Sand color <code>#d2be8c</code>)</li>
+            <li><strong>Meadow:</strong> 0.48 ≤ Height &lt; 0.62 (Grass color <code>#91b96e</code>)</li>
+            <li><strong>Dense Forest:</strong> Height ≥ 0.62 (Forest color <code>#508755</code>)</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 MapGen Engine. Built with Python 3, NumPy, Pillow, and Modern Web Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
