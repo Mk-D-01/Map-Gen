@@ -2,25 +2,25 @@
 MapGen Engine — Flask Application (OOP)
 
 Uses an ``MapGenApp`` factory class that encapsulates Flask app creation,
-CORS configuration, and route registration.  The generator class and
+CORS configuration, and route registration. The generator class and
 exporter instance are injected as dependencies, keeping the app open
 for extension with new algorithms and export formats.
 
 Routes:
-    GET  /health       → {"status": "ok"}
+    GET  /health        → {"status": "ok"}
     POST /api/generate → accepts {seed, width, height}, returns {matrix, seed}
     POST /api/export   → accepts {seed, width, height}, returns PNG download
 
 OOP Principles:
-    - Encapsulation:          Flask app and config wrapped in a class.
-    - Dependency Injection:   Generator class and exporter are pluggable.
-    - Single Responsibility:  Routing logic separated from generation logic.
+    - Encapsulation:        Flask app and config wrapped in a class.
+    - Dependency Injection: Generator class and exporter are pluggable.
+    - Single Responsibility: Routing logic separated from generation logic.
 """
 
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
@@ -52,8 +52,8 @@ class MapGenApp:
 
         Args:
             generator_class: A *class* (not instance) that subclasses
-                             ``BaseGridGenerator``.  Instantiated per request.
-            exporter:        An exporter instance.  Defaults to ``PNGExporter()``.
+                             ``BaseGridGenerator``. Instantiated per request.
+            exporter:        An exporter instance. Defaults to ``PNGExporter()``.
         """
         self._generator_class = generator_class
         self._exporter = exporter or PNGExporter()
