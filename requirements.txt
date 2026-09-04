@@ -1,0 +1,4 @@
+Flask==3.1.*
+flask-cors==5.*
+Pillow==11.*
+pytest==8.*

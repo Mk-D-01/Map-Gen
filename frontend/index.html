@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MapGen Engine — Generate procedural 2D cave maps with cellular automata. Enter a seed and visualise on HTML5 Canvas.">
+  <title>MapGen Engine — Prototype Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Ambient Glow Effects -->
+  <div class="bg-glow-container" aria-hidden="true">
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+    <div class="bg-glow-3"></div>
+  </div>
+
+  <main class="app-container">
+
+    <!-- ── Header ──────────────────────────────────────────────── -->
+    <header class="app-header">
+      <div class="brand-logo">
+        <div class="brand-icon">M</div>
+        <h1 class="brand-title">MapGen <span class="text-gradient-warm">Engine</span></h1>
+      </div>
+      <p class="app-subtitle">Procedural 2D Map Generator — Week 1 Prototype</p>
+    </header>
+
+    <!-- ── Main Card ───────────────────────────────────────────── -->
+    <div class="glass-card">
+
+      <!-- Controls -->
+      <section class="controls-section">
+        <div class="controls-grid">
+          <div class="input-group">
+            <label for="seedInput">Seed</label>
+            <input type="number" id="seedInput" value="42" placeholder="e.g. 42">
+          </div>
+          <div class="input-group">
+            <label for="widthInput">Width</label>
+            <input type="number" id="widthInput" value="20" min="5" max="100" placeholder="20">
+          </div>
+          <div class="input-group">
+            <label for="heightInput">Height</label>
+            <input type="number" id="heightInput" value="20" min="5" max="100" placeholder="20">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="generateBtn" class="btn btn-primary" type="button">
+            <span class="spinner"></span>
+            <span class="btn-text">⚡ Generate Prototype Map</span>
+          </button>
+          <button id="downloadBtn" class="btn btn-secondary" type="button" disabled>
+            <span class="spinner"></span>
+            <span class="btn-text">⬇ Download PNG</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Canvas Output -->
+      <section class="canvas-section">
+        <div class="canvas-header">
+          <span class="canvas-title">Generated Map</span>
+          <span id="canvasMeta" class="canvas-meta"></span>
+        </div>
+        <div id="canvasWrapper" class="canvas-wrapper">
+          <div id="canvasPlaceholder" class="canvas-placeholder">
+            <div class="canvas-placeholder-icon">🗺️</div>
+            <div class="canvas-placeholder-text">
+              Enter a seed and click <strong>Generate</strong><br>
+              to create your first procedural map.
+            </div>
+          </div>
+          <canvas id="mapCanvas" width="400" height="400" style="display: none;"></canvas>
+        </div>
+      </section>
+
+      <!-- Status Bar -->
+      <div id="statusBar" class="status-bar"></div>
+
+    </div>
+
+    <!-- ── Footer ──────────────────────────────────────────────── -->
+    <footer class="app-footer">
+      <p>MapGen Engine &copy; 2026 &mdash; <a href="../web/index.html">Documentation</a></p>
+    </footer>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
