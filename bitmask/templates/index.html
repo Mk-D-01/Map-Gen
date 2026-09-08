@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tile Asset Bitmasker & Procedural Map Generator (64x64)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #eee;
+            margin: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        canvas {
+            border: 2px solid #444;
+            background: #111;
+            cursor: crosshair;
+        }
+
+        .controls {
+            margin-bottom: 10px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 6px 12px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #28a745;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .mapping-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎮 Tile Asset Bitmasker & Procedural Map Generator</h1>
+
+    <div class="container">
+        <!-- Tile Slicer & Bitmask Assigner -->
+        <div class="card">
+            <h3>1. Interactive Tile Mapping (64x64 Default)</h3>
+            <div class="controls">
+                <label>Tile W: <input type="number" id="tileW" value="64" style="width: 50px;"></label>
+                <label>Tile H: <input type="number" id="tileH" value="64" style="width: 50px;"></label>
+                <br><br>
+                <label>Bitmask Value (0-15):
+                    <select id="maskSelect">
+                        <option value="15">15: Center (N+E+S+W)</option>
+                        <option value="0">0: Isolated Single Tile</option>
+                        <option value="1">1: North End (N)</option>
+                        <option value="2">2: East End (E)</option>
+                        <option value="3">3: N + E Corner</option>
+                        <option value="4">4: South End (S)</option>
+                        <option value="5">5: N + S Straight</option>
+                        <option value="6">6: E + S Corner</option>
+                        <option value="7">7: N + E + S Edge</option>
+                        <option value="8">8: West End (W)</option>
+                        <option value="9">9: N + W Corner</option>
+                        <option value="10">10: E + W Straight</option>
+                        <option value="11">11: N + E + W Edge</option>
+                        <option value="12">12: S + W Corner</option>
+                        <option value="13">13: N + S + W Edge</option>
+                        <option value="14">14: E + S + W Edge</option>
+                    </select>
+                </label>
+            </div>
+            <canvas id="sourceCanvas"></canvas>
+            <h4>Assigned Mappings:</h4>
+            <div id="mappingList" class="mapping-list">No masks assigned yet.</div>
+            <br>
+            <button id="generateBtn">🚀 Send JSON & Generate Map</button>
+        </div>
+
+        <!-- Level Display Output -->
+        <div class="card">
+            <h3>2. Procedurally Generated Level Output</h3>
+            <canvas id="mapCanvas" width="1024" height="640"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const img = new Image();
+        img.src = '/static/Tilemap_color2.png';
+
+        const sourceCanvas = document.getElementById('sourceCanvas');
+        const sourceCtx = sourceCanvas.getContext('2d');
+        const mapCanvas = document.getElementById('mapCanvas');
+        const mapCtx = mapCanvas.getContext('2d');
+
+        let selectedTile = null;
+        const bitmaskMap = {};
+
+        img.onload = () => {
+            sourceCanvas.width = img.width;
+            sourceCanvas.height = img.height;
+            drawSource();
+        };
+
+        // Redraw grid when dimensions change manually
+        document.getElementById('tileW').addEventListener('change', drawSource);
+        document.getElementById('tileH').addEventListener('change', drawSource);
+
+        function drawSource() {
+            sourceCtx.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+            sourceCtx.drawImage(img, 0, 0);
+
+            const tw = parseInt(document.getElementById('tileW').value) || 64;
+            const th = parseInt(document.getElementById('tileH').value) || 64;
+
+            sourceCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            sourceCtx.lineWidth = 1;
+
+            for (let x = 0; x < sourceCanvas.width; x += tw) {
+                sourceCtx.beginPath(); sourceCtx.moveTo(x, 0); sourceCtx.lineTo(x, sourceCanvas.height); sourceCtx.stroke();
+            }
+            for (let y = 0; y < sourceCanvas.height; y += th) {
+                sourceCtx.beginPath(); sourceCtx.moveTo(0, y); sourceCtx.lineTo(sourceCanvas.width, y); sourceCtx.stroke();
+            }
+
+            if (selectedTile) {
+                sourceCtx.strokeStyle = '#00ff00';
+                sourceCtx.lineWidth = 2;
+                sourceCtx.strokeRect(selectedTile.x, selectedTile.y, tw, th);
+            }
+        }
+
+        sourceCanvas.addEventListener('click', (e) => {
+            const rect = sourceCanvas.getBoundingClientRect();
+            const tw = parseInt(document.getElementById('tileW').value) || 64;
+            const th = parseInt(document.getElementById('tileH').value) || 64;
+
+            const x = Math.floor((e.clientX - rect.left) / tw) * tw;
+            const y = Math.floor((e.clientY - rect.top) / th) * th;
+
+            selectedTile = { x, y, w: tw, h: th };
+            const maskVal = document.getElementById('maskSelect').value;
+
+            bitmaskMap[maskVal] = { x, y, w: tw, h: th };
+            updateMappingDisplay();
+            drawSource();
+        });
+
+        function updateMappingDisplay() {
+            const listDiv = document.getElementById('mappingList');
+            listDiv.innerHTML = Object.entries(bitmaskMap)
+                .map(([mask, crop]) => `<div><strong>Mask ${mask}:</strong> Crop [x:${crop.x}, y:${crop.y}]</div>`)
+                .join('');
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mapping: bitmaskMap })
+            });
+            const data = await response.json();
+            renderGeneratedMap(data);
+        });
+
+        function renderGeneratedMap(data) {
+            mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+            const tw = parseInt(document.getElementById('tileW').value) || 64;
+            const th = parseInt(document.getElementById('tileH').value) || 64;
+
+            // Resize map canvas to cleanly fit grid layout
+            mapCanvas.width = data.width * tw;
+            mapCanvas.height = data.height * th;
+
+            for (let r = 0; r < data.height; r++) {
+                for (let c = 0; c < data.width; c++) {
+                    const cell = data.grid[r][c];
+                    const px = c * tw;
+                    const py = r * th;
+
+                    if (cell.type === 'terrain' && cell.tile) {
+                        mapCtx.drawImage(
+                            img,
+                            cell.tile.x, cell.tile.y, cell.tile.w, cell.tile.h,
+                            px, py, tw, th
+                        );
+                    } else if (cell.type === 'terrain') {
+                        mapCtx.fillStyle = '#2e8b57';
+                        mapCtx.fillRect(px, py, tw, th);
+                    } else {
+                        mapCtx.fillStyle = '#1c3144';
+                        mapCtx.fillRect(px, py, tw, th);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
